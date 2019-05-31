@@ -37,7 +37,7 @@ const Select = window.Select;
 
 //import { Button } from 'reactstrap';
 
-// Obtain the root 
+// Obtain the root
 const rootElement = document.getElementById('root');
 
 
@@ -72,6 +72,13 @@ class MainPage extends React.Component {
             selectedOption: null,
 
         }
+    }
+
+    componentDidMount() {
+        const previewElm = document.getElementById('preview-video');
+        navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
+            previewElm.srcObject = stream;
+        })
     }
 
     _onFileUpload = (event) => {
@@ -127,6 +134,45 @@ class MainPage extends React.Component {
         } catch (e) {
             alert(e)
         }
+    };
+
+    _predict_object = async (event) => {
+        this.setState({isLoading: true});
+        const videoElm = document.getElementById('preview-video')
+        let resPromise = null;
+        const data = new FormData();
+        const cap = new ImageCapture(videoElm.srcObject.getTracks()[0])
+        const img = await cap.grabFrame()
+        this.setState({
+            rawFile: img,
+            isLoading: false
+        })
+
+        // data.append('file', );
+        // resPromise = axios.post('/api/classify', data);
+
+
+        // if (this.state.rawFile) {
+        //     const data = new FormData();
+        //     data.append('file', this.state.rawFile);
+        //     resPromise = axios.post('/api/classify', data);
+        // } else {
+        //     resPromise = axios.get('/api/classify', {
+        //         params: {
+        //             url: this.state.file
+        //         }
+        //     });
+        // }
+
+        // try {
+        //     const res = await resPromise;
+        //     const payload = res.data;
+
+        //     this.setState({predictions: payload.predictions, isLoading: false});
+        //     console.log(payload)
+        // } catch (e) {
+        //     alert(e)
+        // }
     };
 
 
@@ -204,7 +250,9 @@ class MainPage extends React.Component {
                         </Label>
                     </FormGroup>
 
+
                     <img src={this.state.file} className={"img-preview"} hidden={!this.state.imageSelected}/>
+
 
                     <FormGroup>
                         <Button color="success" onClick={this._predict}
@@ -220,6 +268,17 @@ class MainPage extends React.Component {
 
                         </div>
                     )}
+
+                    <h3>OR</h3>
+
+                    <video id='preview-video' autoPlay/>
+                    <FormGroup>
+                        <Button color="success" onClick={this._predict_object}
+                                disabled={this.state.isLoading}> Predict Object</Button>
+                        <span className="p-1 "/>
+                        <Button color="danger" onClick={this._clear}> Clear</Button>
+                    </FormGroup>
+
 
                 </Form>
 
@@ -255,6 +314,23 @@ class CustomNavBar extends React.Component {
     }
 }
 
+class Image extends React.Component {
+// Use the render function to return JSX component
+    _resize(event) {
+        console.log('Click')
+    }
+    render() {
+        return (
+            <div>
+                <FormGroup>
+                    <Button color="success" onClick={this._resize} >Resize!</Button>
+                </FormGroup>
+            </div>
+        );
+    }
+}
+
+
 // Create a function to wrap up your component
 function App() {
     return (
@@ -267,7 +343,7 @@ function App() {
                     <main role="main" className="container">
                         <Route exact path="/" component={MainPage}/>
                         <Route exact path="/about" component={About}/>
-
+                        <Route exact path="/image" component={Image}/>
                     </main>
 
 
